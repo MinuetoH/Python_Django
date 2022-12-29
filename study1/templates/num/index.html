@@ -1,0 +1,76 @@
+{# templates/num/index.html #}
+{% extends "base1.html" %}
+{% block title %}숫자인식{% endblock %}
+
+{% block content %}
+<div style="padding-bottom:15px;width:98%;">
+     <br />
+    <canvas id="canvas" width="300" height="150" 
+            style="position: relative; border: 1px solid #000;"></canvas>
+    <br />
+        <a href="#" onclick="onClear();">지우기</a>
+        <a href="#" onclick="alertOnSave(this);">숫자예측</a>
+        <div id="result"></div> <!-- 결과 출 -->
+</div>
+
+<script type="text/javascript">
+let canvas = document.getElementById('canvas');
+c = canvas.getContext('2d');
+c.fillStyle = '#fff';   //흰색바탕
+c.fillRect(0, 0, canvas.width, canvas.height);
+c.fillStyle = '#000';   //글자색 검정
+
+canvas.addEventListener('mousemove', event =>
+  draw(event.offsetX, event.offsetY)
+);
+isDrawing = false
+canvas.addEventListener('mousedown', () => isDrawing = true);
+
+canvas.addEventListener('mouseup', () => isDrawing = false);
+
+
+//c.fillStyle = 'black'; 
+
+function onClear() {
+   let canvas = document.getElementById('canvas');
+   c = canvas.getContext('2d');
+   c.fillStyle = '#fff'; 
+   c.fillRect(0, 0, canvas.width, canvas.height);
+   c.fillStyle = '#000';
+    $("#result").html("")   //result의 값을 제거.
+ }
+
+
+function draw(x, y) {
+  if (isDrawing) {
+    c.beginPath();
+    c.arc(x, y, 5, 0, Math.PI*2);
+    c.closePath();
+    c.fill();
+  }
+}
+
+
+
+function alertOnSave(a){
+    const canvas = $("#canvas") //canvas 태그
+    //canvas태그에 그려진 내용을 서버로 업로드.
+    $.ajax({
+	 type : 'post',
+	 url : '/num/upload',
+	 cache: false,
+	 data: {data:document.getElementById("canvas").toDataURL("image/png")},
+	 success : function (data) {
+    	 //서버 결과값 출력
+        console.log(data.result)
+        $("#result").html(data.result)
+	 },
+	error: function(error) {
+		console.log(error);
+	}
+    });    
+}
+</script>
+{% endblock %}
+
+
